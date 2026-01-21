@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const isProd = process.env.NODE_ENV === 'production';
-const repoName = '/site'; // <--- MUST MATCH YOUR GITHUB REPO NAME EXACTLY
+const repoName = '/site'; // Ensure this matches your repo name
 
 const nextConfig: NextConfig = {
   output: "export",
@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
   assetPrefix: isProd ? repoName : '',
   images: {
     unoptimized: true,
+  },
+  // Inject build timestamp
+  env: {
+    NEXT_PUBLIC_BUILD_TIME: new Date().toISOString(),
   },
 };
 

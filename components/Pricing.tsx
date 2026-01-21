@@ -1,8 +1,8 @@
 'use client'
 import { useState } from 'react'
-import { clsx } from 'clsx'
+import { Check } from 'lucide-react' // Import Icon
 
-// Mock data - will replace with Supabase data later
+// Mock data
 const PLANS = [
   { id: '1', name: 'Consultation', price: 250, interval: 'hour', features: ['Architecture Review', 'Stack Selection', 'Security Audit'] },
   { id: '2', name: 'MVP Build', price: 5000, interval: 'fixed', features: ['Next.js + Supabase', 'Auth & Database', 'Deployment Pipeline'] },
@@ -10,7 +10,7 @@ const PLANS = [
 ]
 
 export default function Pricing() {
-  const [billingInterval, setBillingInterval] = useState('month')
+  const [billingInterval, setBillingInterval] = useState('month') // Kept state if you want toggle later
 
   return (
     <div className='flex flex-col items-center max-w-7xl mx-auto'>
@@ -19,9 +19,20 @@ export default function Pricing() {
         <p className="text-slate-400 max-w-xl mx-auto">Select a blueprint to begin construction.</p>
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-8 w-full'>
+      {/* LAYOUT FIX:
+         - Added 'max-w-6xl' to constrain the total width of the group.
+         - Added 'justify-items-center' to center cards within their columns.
+      */}
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl justify-items-center px-4'>
         {PLANS.map((plan) => (
-          <div key={plan.id} className='relative group border border-blue-900/50 bg-slate-900/40 p-8 rounded-sm hover:border-cyan-500/50 transition-all duration-300'>
+          <div 
+            key={plan.id} 
+            /* CARD FIX:
+               - Added 'w-full max-w-[380px]' to prevent the card from stretching too wide.
+               - Added 'flex flex-col' to push button to bottom.
+            */
+            className='relative group flex flex-col w-full max-w-[380px] border border-blue-900/50 bg-slate-900/40 p-8 rounded-sm hover:border-cyan-500/50 transition-all duration-300'
+          >
             {/* Holographic corner effect */}
             <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-cyan-500 opacity-50 group-hover:opacity-100"></div>
             <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-cyan-500 opacity-50 group-hover:opacity-100"></div>
@@ -32,16 +43,17 @@ export default function Pricing() {
               <span className='ml-2 text-sm text-slate-500 font-mono'>/ {plan.interval}</span>
             </div>
 
-            <ul className='mt-8 space-y-4 mb-8'>
+            <ul className='mt-8 space-y-4 mb-8 flex-grow'>
               {plan.features.map((feature) => (
                 <li key={feature} className='flex items-center text-slate-300 text-sm'>
-                  <span className='w-1.5 h-1.5 bg-blue-500 mr-3 rounded-full'></span>
+                  {/* Replaced CSS dot with Check Icon */}
+                  <Check className="w-4 h-4 text-cyan-500 mr-3 flex-shrink-0" />
                   {feature}
                 </li>
               ))}
             </ul>
 
-            <button className='w-full py-3 border border-blue-800 text-blue-100 hover:bg-blue-900/30 hover:text-white hover:border-blue-500 transition-all rounded-sm font-mono text-sm uppercase tracking-wider'>
+            <button className='mt-auto w-full py-3 border border-blue-800 text-blue-100 hover:bg-blue-900/30 hover:text-white hover:border-blue-500 transition-all rounded-sm font-mono text-sm uppercase tracking-wider shadow-[0_0_10px_rgba(0,0,0,0.5)]'>
               Select_Blueprint
             </button>
           </div>

@@ -1,7 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+.npmrc
+**/node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -12,6 +13,7 @@
 
 # testing
 /coverage
+.vscode/
 
 # next.js
 /.next/
@@ -29,6 +31,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+
+# Supabase
+/supabase/.temp/
+/supabase/.branches/
 
 # env files (can opt-in for committing if needed)
 .env*
