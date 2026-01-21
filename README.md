@@ -1,5 +1,5 @@
 
-# B2Me Portfolio: Digital Architect
+# B2Me Portfolio: Digital Architecture
 
 **Status:** Phase 1 (Infrastructure Build)
 **Architecture:** Static Frontend (GitHub Pages) + Edge Backend (Supabase)
@@ -79,6 +79,57 @@ const nextConfig: NextConfig = {
 export default nextConfig;
 
 ```
+
+### Step D: Setup Deployment Pipeline (GitHub Actions)
+
+Since we are using GitHub Pages, we need a workflow to build and deploy the site automatically.
+
+1. **Create the file structure:** `.github/workflows/deploy.yml`
+2. **Paste the following content:**
+
+```yaml
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches: ["main"]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Build
+        run: |
+          npm ci
+          npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+```
+
+3. **Add Secrets:** Go to your GitHub Repository Settings  Secrets and variables  Actions. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (values found in `.env.local`).
 
 ---
 
@@ -270,67 +321,18 @@ We utilize three distinct environments to ensure stability.
 
 * **Trigger:** Push to `main` branch.
 * **Action:** GitHub Action builds static HTML and deploys to `user.github.io/b2me-portfolio`.
-* **File:** `.github/workflows/deploy.yml`
+* **Config:** See Step 1D.
 
 ---
 
-## 🚀 9. Deployment Script (GitHub Actions)
-
-**File:** `.github/workflows/deploy.yml`
-**Secrets Required in GitHub:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-
-```yaml
-name: Deploy to GitHub Pages
-on:
-  push:
-    branches: ["main"]
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      - name: Build
-        run: |
-          npm ci
-          npm run build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./out
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
-
-```
-
----
-
-## 🗺️ 10. Feature Roadmap
+## 🗺️ 9. Feature Roadmap
 
 ### Phase 1: Infrastructure (Current)
 
 * [x] Next.js Clean Build
 * [x] Supabase Project Setup
-* [ ] CI/CD Pipeline
-* [ ] UI Component Transplant (Hero, Nav)
+* [x] CI/CD Pipeline
+* [x] UI Component Transplant (Hero, Nav)
 
 ### Phase 2: Logic & Integration
 
