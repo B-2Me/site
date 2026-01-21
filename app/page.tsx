@@ -2,13 +2,17 @@ import Pricing from '@/components/Pricing'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 
+const bgStyle = {
+  backgroundImage: `url('${process.env.NODE_ENV === 'production' ? '/site/grid.svg' : '/grid.svg'}')`
+}
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-cyan-500/30">
       <Navbar />
 
       {/* Hero Section */}
-      <section id="about" className="flex flex-col items-center justify-center h-[90vh] border-b border-blue-900/30 bg-[url('/grid.svg')] relative">
+      <section id="about" style={bgStyle} className="flex flex-col items-center justify-center h-[90vh] border-b border-blue-900/30 relative">
         <div className="text-center space-y-6 max-w-2xl px-4 z-10">
           <p className="font-mono text-cyan-500 text-sm tracking-widest uppercase animate-pulse">
             System Status: Online
