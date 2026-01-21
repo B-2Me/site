@@ -1,5 +1,5 @@
 
-# B2Me Portfolio: Digital Architecture
+# B2Me Portfolio: Digital Architect
 
 **Status:** Phase 1 (Infrastructure Build)
 **Architecture:** Static Frontend (GitHub Pages) + Edge Backend (Supabase)
@@ -11,7 +11,7 @@ B2Me is a "Headless" portfolio that uses **GitHub Repositories as the CMS**. It 
 
 ### The Tech Stack
 
-* **Frontend:** Next.js 14 (App Router)
+* **Frontend:** Next.js 16 (App Router)
 * **Hosting:** GitHub Pages (Static Export)
 * **Database & Auth:** Supabase (PostgreSQL + GoTrue)
 * **State Management:** TanStack Query (React Query)
@@ -38,25 +38,44 @@ We use a fresh Next.js shell to avoid server-side dependencies (like Prisma/Next
 
 ### Step A: Initialize
 
-```bash
-# 1. Create the Shell
-npx create-next-app@latest b2me-portfolio --typescript --tailwind --eslint
-cd b2me-portfolio
+Run the creation command and select the following options to match our file structure:
 
-# 2. Install the Edge Stack
+```bash
+npx create-next-app@latest b2me-portfolio --typescript --tailwind --eslint
+
+```
+
+**Select these options when prompted:**
+
+* **Would you like to use React Compiler?** ... `No`
+* **Would you like your code inside a `src/` directory?** ... `No`
+* **Would you like to use App Router? (recommended)** ... `Yes`
+* **Would you like to customize the import alias (`@/*` by default)?** ... `No`
+
+### Step B: Install the Edge Stack
+
+Enter the folder and install the libraries compatible with our architecture:
+
+```bash
+cd b2me-portfolio
 npm install @supabase/supabase-js @tanstack/react-query @stripe/stripe-js react-hot-toast clsx tailwind-merge
 
 ```
 
-### Step B: Configure Static Export
+### Step C: Configure Static Export
 
-Update `next.config.mjs`:
+Update `next.config.ts` to tell Next.js we are deploying to a static host (GitHub Pages).
 
-```javascript
-const nextConfig = {
-  output: 'export', // Required for GitHub Pages
-  images: { unoptimized: true }, // GitHub Pages cannot resize images on the fly
+```typescript
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  output: "export", // Required for GitHub Pages
+  images: { 
+    unoptimized: true // GitHub Pages cannot resize images on the fly
+  },
 };
+
 export default nextConfig;
 
 ```
@@ -102,7 +121,49 @@ create policy "System Update" on project_cache for all using ( auth.role() = 'se
 
 ---
 
-## 🔌 3. App Integration & Logic
+## 🎨 3. Component Migration (The Transplant)
+
+We are leveraging the UI from `bolg55/SaaS-Starter` but stripping its backend logic.
+
+### Process:
+
+1. **Clone Source:** Clone the starter repo into a *separate* folder on your computer (do not `npm install` inside it, just view the files).
+2. **Copy Components:** Manually copy `Hero.tsx`, `Navbar.tsx`, and `Footer.tsx` (or their equivalents) into your new `components/` folder.
+3. **Sanitize:** Open each file and **DELETE** any imports related to:
+* ❌ `next-auth` or `useSession`
+* ❌ `prisma` or `@prisma/client`
+* ❌ `trpc` or `axios`
+
+
+4. **Wire Up Data:** Replace any `prisma.findMany()` or API calls with standard TanStack Query hooks.
+
+**Example: Migrating a Grid Component**
+
+```tsx
+'use client'
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
+
+// 1. Define the Fetcher
+const fetchProjects = async () => {
+  // Use Edge Function in production, or direct select for MVP
+  const { data } = await supabase.from('project_cache').select('*')
+  return data
+}
+
+// 2. Use the Hook (replaces generic useEffect or SSR)
+export default function ProjectGrid() {
+  const { data, isLoading } = useQuery({ queryKey: ['projects'], queryFn: fetchProjects })
+  
+  if (isLoading) return <div>Loading Blueprints...</div>
+  return <div>{data?.map(p => <p key={p.id}>{p.name}</p>)}</div>
+}
+
+```
+
+---
+
+## 🔌 4. App Integration & Logic
 
 ### Caching Strategy (Stale-While-Revalidate)
 
@@ -115,7 +176,7 @@ To avoid hitting GitHub's API rate limits (60 requests/hr), we implement a "Smar
 
 ---
 
-## 🔐 4. Authentication: The "Access Key" System
+## 🔐 5. Authentication: The "Access Key" System
 
 We use a **"Wallet-First"** identity model. The user is identified by a cryptographic key (Access Key), not necessarily an email.
 
@@ -142,7 +203,7 @@ Since losing the Access Key means losing the account, we offer a "Link Method."
 
 ---
 
-## 🏷️ 5. CMS Strategy: GitHub Topics
+## 🏷️ 6. CMS Strategy: GitHub Topics
 
 Repositories are controlled via **GitHub Topics**. We do not update the database manually; the Edge Function scrapes these tags.
 
@@ -156,7 +217,7 @@ Repositories are controlled via **GitHub Topics**. We do not update the database
 
 ---
 
-## 🎨 6. Design System: "The Digital Architect"
+## 🎨 7. Design System: "The Digital Architect"
 
 **Visual Identity:** Structural, schematic, transparent.
 
@@ -175,7 +236,7 @@ Repositories are controlled via **GitHub Topics**. We do not update the database
 
 ---
 
-## 💻 7. Development Workflows & Testing
+## 💻 8. Development Workflows & Testing
 
 We utilize three distinct environments to ensure stability.
 
@@ -213,7 +274,7 @@ We utilize three distinct environments to ensure stability.
 
 ---
 
-## 🚀 8. Deployment Script (GitHub Actions)
+## 🚀 9. Deployment Script (GitHub Actions)
 
 **File:** `.github/workflows/deploy.yml`
 **Secrets Required in GitHub:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -262,12 +323,12 @@ jobs:
 
 ---
 
-## 🗺️ 9. Feature Roadmap
+## 🗺️ 10. Feature Roadmap
 
 ### Phase 1: Infrastructure (Current)
 
-* [ ] Next.js Clean Build
-* [ ] Supabase Project Setup
+* [x] Next.js Clean Build
+* [x] Supabase Project Setup
 * [ ] CI/CD Pipeline
 * [ ] UI Component Transplant (Hero, Nav)
 
