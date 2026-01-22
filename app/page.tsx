@@ -60,6 +60,11 @@ export default function Home() {
         <Pricing />
       </section>
 
+      {/* About Section */}
+      <section id="about" className="py-24 px-4 bg-slate-950 relative">
+        <About />
+      </section>
+      
       {/* Contact Section - REDUCED TOP PADDING (pt-12) */}
       <section id="contact" className="pt-12 pb-24 px-4 bg-slate-950 relative border-b border-blue-900/30">
          <div className="max-w-4xl mx-auto text-center mb-12">
@@ -67,11 +72,6 @@ export default function Home() {
             <p className="text-slate-400">Initialize handshake to request collaboration.</p>
          </div>
          <Contact />
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="py-24 px-4 bg-slate-950 relative">
-        <About />
       </section>
 
       <Footer />
