@@ -64,7 +64,9 @@ export default function Pricing() {
   return (
     <div className='flex flex-col items-center max-w-7xl mx-auto'>
       <div className="text-center mb-16 space-y-4">
-        <h3 className="text-3xl font-mono text-white">// ARCHITECTURAL_SERVICES</h3>
+        <h3 className="text-lg sm:text-xl md:text-3xl font-mono text-white font-bold break-words px-4">
+  // ARCHITECTURAL_SERVICES
+</h3>
         
         <div className="max-w-2xl mx-auto bg-blue-950/20 border border-blue-900/30 p-6 rounded-sm">
            <p className="text-slate-400 leading-relaxed flex gap-4 text-left">
