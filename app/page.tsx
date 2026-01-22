@@ -6,7 +6,7 @@ import About from '@/components/About'
 
 // 1. Helper for the Grid Background
 const bgStyle = {
-  backgroundImage: `url('${process.env.NODE_ENV === 'production' ? '/site/grid.svg' : '/grid.svg'}')`
+  backgroundImage: `url('${process.env.NODE_ENV === 'production' ? '/grid.svg' : '/grid.svg'}')`
 }
 
 export default function Home() {
