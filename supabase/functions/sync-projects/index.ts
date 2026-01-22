@@ -2,6 +2,8 @@
 // https://deno.land/manual/getting_started/setup_your_environment
 // This enables autocomplete, go to definition, etc.
 
+// Setup type definitions for built-in Supabase Runtime APIs
+import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
@@ -10,39 +12,43 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req) => {
-  // 1. Handle CORS (Allow browser to call this function)
+  // 1. Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    // 2. Initialize Supabase Client (Admin Mode)
-    // We use the Service Role Key to bypass RLS (Row Level Security) so we can WRITE to the DB
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // 3. Fetch from GitHub API
-    // We require the topic 'showcase-b2me' to filter out random repos
+    // GET GITHUB TOKEN (For Private Repos) - Optional if you set the secret
+    const githubToken = Deno.env.get('GITHUB_TOKEN')
+    
+    // Construct Headers
+    const ghHeaders: HeadersInit = {
+      Accept: 'application/vnd.github.v3+json',
+      'User-Agent': 'b2me-portfolio-scraper',
+    }
+    if (githubToken) {
+      ghHeaders['Authorization'] = `Bearer ${githubToken}`
+    }
+
+    // Fetch from GitHub
     const githubResponse = await fetch(
       'https://api.github.com/search/repositories?q=topic:showcase-b2me&sort=updated',
-      {
-        headers: {
-          Accept: 'application/vnd.github.v3+json',
-          'User-Agent': 'b2me-portfolio-scraper', // GitHub requires a User-Agent
-        },
-      }
+      { headers: ghHeaders }
     )
 
     if (!githubResponse.ok) {
-      throw new Error(`GitHub API Error: ${githubResponse.statusText}`)
+      const errorText = await githubResponse.text()
+      throw new Error(`GitHub API Error: ${githubResponse.statusText} | ${errorText}`)
     }
 
     const githubData = await githubResponse.json()
     const repos = githubData.items || []
 
-    // 4. Transform Data (Keep only what we need)
     const sanitizedRepos = repos.map((repo: any) => ({
       id: repo.id,
       name: repo.name,
@@ -55,12 +61,11 @@ Deno.serve(async (req) => {
       last_updated: repo.updated_at,
     }))
 
-    // 5. Update Database (The Cache)
-    // We store the ENTIRE array as a single JSON blob in 'project_cache'
+    // Update DB
     const { error: dbError } = await supabaseClient
       .from('project_cache')
       .upsert({ 
-        id: 1, // We only ever keep 1 row (Single Source of Truth)
+        id: 1, 
         repo_data: sanitizedRepos,
         updated_at: new Date().toISOString()
       })

@@ -1,60 +1,119 @@
 'use client'
-import { useState } from 'react'
-import { Check } from 'lucide-react' // Import Icon
+import { useEffect } from 'react'
+import { Check, Calendar, Video } from 'lucide-react'
+import { getCalApi } from "@calcom/embed-react"
 
-// Mock data
 const PLANS = [
-  { id: '1', name: 'Consultation', price: 250, interval: 'hour', features: ['Architecture Review', 'Stack Selection', 'Security Audit'] },
-  { id: '2', name: 'MVP Build', price: 5000, interval: 'fixed', features: ['Next.js + Supabase', 'Auth & Database', 'Deployment Pipeline'] },
-  { id: '3', name: 'Scale', price: 15000, interval: 'fixed', features: ['High Performance', 'Custom Edge Functions', 'Audit Logs'] }
+  { 
+    id: '1', 
+    name: 'AUDIT', 
+    description: 'System analysis and architectural validation.',
+    features: [
+      'Self-Hosted Infrastructure Review',
+      'Secure Tunneling (OpenSSH/TCP)', 
+      'Embedded vs Cloud Feasibility',
+      'Legacy Stack Assessment'
+    ] 
+  },
+  { 
+    id: '2', 
+    name: 'OPTIMIZE', 
+    description: 'Integration of local AI and media processing.',
+    features: [
+      'Local LLM Orchestration (Ollama)',
+      'RAG Pipeline Integration (S3/Notion)',
+      'Voice/Video Stream Tuning',
+      'TTS/STT Pipelines (Kokoro/Speaches)'
+    ] 
+  },
+  { 
+    id: '3', 
+    name: 'BUILD', 
+    description: 'Bespoke engineering for non-existent solutions.',
+    features: [
+      'Custom RAG Engines (LlamaIndex/Python)',
+      'Real-Time Audio Systems (Embedded)',
+      'High-Perf Servers (Go/Node/Python)',
+      'Custom Management Interfaces'
+    ] 
+  }
 ]
 
 export default function Pricing() {
-  const [billingInterval, setBillingInterval] = useState('month') // Kept state if you want toggle later
+  
+  useEffect(() => {
+    (async function () {
+      const cal = await getCalApi();
+      cal("ui", {
+        "theme": "dark",
+        "styles": { "branding": { "brandColor": "#06b6d4" } },
+        "hideEventTypeDetails": false,
+        "layout": "month_view"
+      });
+    })();
+  }, []);
+
+  const handleBook = async () => {
+    const cal = await getCalApi();
+    cal("modal", {
+      calLink: "nathan-qm7zbq/30min", // <--- Remember to update this later
+      config: { layout: 'month_view' }
+    });
+  };
 
   return (
     <div className='flex flex-col items-center max-w-7xl mx-auto'>
-      <div className="text-center mb-16">
-        <h3 className="text-3xl font-mono text-white mb-4">// SERVICE_PACKAGES</h3>
-        <p className="text-slate-400 max-w-xl mx-auto">Select a blueprint to begin construction.</p>
+      <div className="text-center mb-16 space-y-4">
+        <h3 className="text-3xl font-mono text-white">// ARCHITECTURAL_SERVICES</h3>
+        
+        <div className="max-w-2xl mx-auto bg-blue-950/20 border border-blue-900/30 p-6 rounded-sm">
+           <p className="text-slate-400 leading-relaxed flex gap-4 text-left">
+             <Video className="w-6 h-6 text-cyan-500 flex-shrink-0 mt-1" />
+             <span>
+               Complex architectures are easier to discuss in real-time. 
+               Select a tier below to initialize a{' '}
+               <button 
+                 onClick={handleBook}
+                 className="text-cyan-400 font-bold hover:text-cyan-300 underline underline-offset-4 decoration-cyan-500/50 hover:decoration-cyan-400 transition-all cursor-pointer"
+               >
+                 secure video uplink
+               </button>
+               {' '}and discuss your project requirements directly.
+             </span>
+           </p>
+        </div>
       </div>
 
-      {/* LAYOUT FIX:
-         - Added 'max-w-6xl' to constrain the total width of the group.
-         - Added 'justify-items-center' to center cards within their columns.
-      */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl justify-items-center px-4'>
         {PLANS.map((plan) => (
           <div 
             key={plan.id} 
-            /* CARD FIX:
-               - Added 'w-full max-w-[380px]' to prevent the card from stretching too wide.
-               - Added 'flex flex-col' to push button to bottom.
-            */
             className='relative group flex flex-col w-full max-w-[380px] border border-blue-900/50 bg-slate-900/40 p-8 rounded-sm hover:border-cyan-500/50 transition-all duration-300'
           >
-            {/* Holographic corner effect */}
             <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-cyan-500 opacity-50 group-hover:opacity-100"></div>
             <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-cyan-500 opacity-50 group-hover:opacity-100"></div>
 
-            <h4 className='text-xl font-bold text-cyan-400 font-mono'>{plan.name}</h4>
-            <div className='mt-4 flex items-baseline'>
-              <span className='text-4xl font-bold text-white tracking-tight'>${plan.price}</span>
-              <span className='ml-2 text-sm text-slate-500 font-mono'>/ {plan.interval}</span>
-            </div>
+            {/* CENTERED HEADER */}
+            <h4 className='text-2xl font-bold text-white font-mono tracking-tight mb-2 text-center w-full'>{plan.name}</h4>
+            <p className="text-slate-500 text-sm font-mono h-12 text-center">{plan.description}</p>
 
-            <ul className='mt-8 space-y-4 mb-8 flex-grow'>
+            <div className="my-8 border-t border-blue-900/30"></div>
+
+            <ul className='space-y-4 flex-grow mb-8'>
               {plan.features.map((feature) => (
-                <li key={feature} className='flex items-center text-slate-300 text-sm'>
-                  {/* Replaced CSS dot with Check Icon */}
-                  <Check className="w-4 h-4 text-cyan-500 mr-3 flex-shrink-0" />
-                  {feature}
+                <li key={feature} className='flex items-start text-slate-300 text-sm'>
+                  <Check className="w-4 h-4 text-cyan-500 mr-3 mt-0.5 flex-shrink-0" />
+                  <span className="font-sans leading-relaxed">{feature}</span>
                 </li>
               ))}
             </ul>
 
-            <button className='mt-auto w-full py-3 border border-blue-800 text-blue-100 hover:bg-blue-900/30 hover:text-white hover:border-blue-500 transition-all rounded-sm font-mono text-sm uppercase tracking-wider shadow-[0_0_10px_rgba(0,0,0,0.5)]'>
-              Select_Blueprint
+            <button 
+              onClick={handleBook}
+              className='mt-auto w-full py-3 border border-blue-800 text-blue-100 hover:bg-cyan-950/30 hover:text-cyan-400 hover:border-cyan-500 transition-all rounded-sm font-mono text-sm uppercase tracking-wider flex items-center justify-center gap-2 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]'
+            >
+              <Calendar className="w-4 h-4" />
+              <span>[ SCHEDULE_SYNC ]</span>
             </button>
           </div>
         ))}

@@ -1,78 +1,121 @@
 
-# B2Me Portfolio: Digital Architecture
+# BTWO.ME Portfolio: Digital Architecture
 
-**Status:** Phase 1 (Infrastructure Build)
+**Status:** Phase 2 Complete (Logic, Integrations, & Domain Live)
 **Architecture:** Static Frontend (GitHub Pages) + Edge Backend (Supabase)
 **Design Theme:** "The Blueprint" (Technical, Schematic, Structural)
+**Live Site:** [btwo.me](https://btwo.me)
 
 ## 📋 Project Overview
 
-B2Me is a "Headless" portfolio that uses **GitHub Repositories as the CMS**. It is designed to be low-maintenance, high-performance, and architecturally transparent.
+`BTWO.ME` is a "Headless" portfolio that uses **GitHub Repositories as the CMS**. It is designed to be low-maintenance, high-performance, and architecturally transparent.
 
 ### The Tech Stack
 
 * **Frontend:** Next.js 16 (App Router)
-* **Hosting:** GitHub Pages (Static Export)
-* **Database & Auth:** Supabase (PostgreSQL + GoTrue)
-* **State Management:** TanStack Query (React Query)
-* **Styling:** Tailwind CSS
+* **Hosting:** GitHub Pages (Static Export) on Apex Domain
+* **Database:** Supabase (PostgreSQL)
+* **Backend Logic:** Supabase Edge Functions (Deno)
+* **Email Infrastructure:** Resend (via `contact` subdomain)
+* **Scheduling:** Cal.com (Embedded React)
+* **Styling:** Tailwind CSS + Lucide Icons
+* **State Management:** TanStack Query
 
 ---
 
 ## ⚖️ Architectural Decisions & Trade-offs
 
-We chose a **Static + Edge** architecture over a traditional Node.js server.
+We chose a **Static + Edge** architecture to balance cost, performance, and complexity.
 
 | Decision | The Benefit | The Trade-off | The Solution |
 | --- | --- | --- | --- |
-| **GitHub Pages** | Free, infinite scaling, 100% uptime. | No server-side runtime (Node.js). | Use **Supabase Edge Functions** for logic. |
-| **Client-Side Fetching** | Fast navigation, cheaper hosting. | SEO sees "skeleton" first. | Acceptable for a portfolio/app; Google renders JS fine. |
-| **GitHub as CMS** | No need to write blog posts; code is content. | API Rate Limits (60/hr). | **Caching Layer** in Supabase (updates daily). |
-| **Access Key Auth** | Frictionless, "Web3-native" feel. | Lost keys = Lost account. | **Optional Email Recovery** (Phase 2). |
+| **GitHub Pages** | Free, infinite scaling, 100% uptime. | No server-side runtime. | Use **Supabase Edge Functions** for logic. |
+| **GitHub as CMS** | Code is content; no manual blog writing. | API Rate Limits & Private Repos. | **Edge Scraper** with Personal Access Token (PAT). |
+| **Subdomain Email** | Isolates domain reputation (`contact.btwo.me`). | Requires DNS config. | **Resend** mapped to subdomain + Reply-To logic. |
+| **Client-Side Admin** | Simple "Access Key" gate for `/console`. | Not cryptographic security. | Acceptable for triggering public sync functions. |
 
 ---
 
-## 🏗️ 1. Installation: The "Clean Build"
+## 🔐 Configuration: Variables & Secrets
 
-We use a fresh Next.js shell to avoid server-side dependencies (like Prisma/NextAuth) that break on GitHub Pages.
+This project relies on a specific set of keys distributed across the Frontend (Next.js), the CI/CD Pipeline (GitHub), and the Backend (Supabase).
 
-### Step A: Initialize
+### 1. Local / Frontend Variables (`.env.local`)
 
-Run the creation command and select the following options to match our file structure:
+*These are built into the static HTML. Do not store sensitive backend keys here.*
 
 ```bash
-npx create-next-app@latest b2me-portfolio --typescript --tailwind --eslint
+# Connection to Supabase
+NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
+
+# The "Password" to unlock the /console page
+NEXT_PUBLIC_ADMIN_KEY="your-secret-session-password"
 
 ```
 
-**Select these options when prompted:**
+### 2. GitHub Repository Secrets
 
-* **Would you like to use React Compiler?** ... `No`
-* **Would you like your code inside a `src/` directory?** ... `No`
-* **Would you like to use App Router? (recommended)** ... `Yes`
-* **Would you like to customize the import alias (`@/*` by default)?** ... `No`
+*Required for the Build Pipeline to function.*
+> Go to: Settings $\rightarrow$ Secrets and variables $\rightarrow$ Actions.
 
-### Step B: Install the Edge Stack
+| Secret Name | Value |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Same as local |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Same as local |
+| `NEXT_PUBLIC_ADMIN_KEY` | Same as local (Ensures Console works in Prod) |
 
-Enter the folder and install the libraries compatible with our architecture:
+### 3. Supabase Edge Secrets
+
+*These live securely on the server side. Used by Deno functions.*
+Set these using the CLI: `npx supabase secrets set KEY=VALUE`
+
+| Secret Name | Purpose |
+| --- | --- |
+| `GITHUB_TOKEN` | A GitHub Personal Access Token (Classic) with `repo` scope. Allows the scraper to see private repos. |
+| `RESEND_API_KEY` | API Key from Resend.com. Allows the `send-email` function to dispatch messages. |
+
+---
+
+## 🏗️ 1. Installation & Setup
+
+### Step A: System Requirements
+
+* Node.js 20+
+* Supabase CLI (`npm install -g supabase`)
+* Docker (Optional, for local backend testing)
+
+### Step B: Install All Dependencies
+
+Run this command to install the core framework plus all integrations added during development:
 
 ```bash
-cd b2me-portfolio
-npm install @supabase/supabase-js @tanstack/react-query @stripe/stripe-js react-hot-toast clsx tailwind-merge
+npm install @supabase/supabase-js @tanstack/react-query @calcom/embed-react lucide-react clsx tailwind-merge
 
 ```
 
-### Step C: Configure Static Export
+### Step C: Asset Handling (Custom Domain vs. GitHub Subdomain)
 
-Update `next.config.ts` to tell Next.js we are deploying to a static host (GitHub Pages).
+**Configuration (`next.config.ts`):**
+
+We use an empty `repoName` because we are hosting on a custom domain (`btwo.me`). If you were to revert to `username.github.io/repo`, you would need to populate the `repoName` string.
 
 ```typescript
 import type { NextConfig } from "next";
 
+const isProd = process.env.NODE_ENV === 'production';
+const repoName = ''; // Ensure this matches your repo name IF using default GitHub Pages URL
+
 const nextConfig: NextConfig = {
-  output: "export", // Required for GitHub Pages
-  images: { 
-    unoptimized: true // GitHub Pages cannot resize images on the fly
+  output: "export",
+  basePath: isProd ? repoName : '',
+  assetPrefix: isProd ? repoName : '',
+  images: {
+    unoptimized: true,
+  },
+  // Inject build timestamp
+  env: {
+    NEXT_PUBLIC_BUILD_TIME: new Date().toISOString(),
   },
 };
 
@@ -80,74 +123,42 @@ export default nextConfig;
 
 ```
 
-### Step D: Setup Deployment Pipeline (GitHub Actions)
+### Step D: Exclude Edge Functions (`tsconfig.json`)
 
-Since we are using GitHub Pages, we need a workflow to build and deploy the site automatically.
+To prevent Next.js from trying to compile Deno code (which causes build failures), we must exclude the `supabase` folder.
 
-1. **Create the file structure:** `.github/workflows/deploy.yml`
-2. **Paste the following content:**
-
-```yaml
-name: Deploy to GitHub Pages
-on:
-  push:
-    branches: ["main"]
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      - name: Build
-        run: |
-          npm ci
-          npm run build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./out
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+```json
+{
+  "compilerOptions": { ... },
+  "exclude": ["node_modules", "supabase"]
+}
 
 ```
-
-3. **Add Secrets:** Go to your GitHub Repository Settings  Secrets and variables  Actions. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (values found in `.env.local`).
 
 ---
 
-## ⚡ 2. Supabase Setup (The Backend)
+## ⚡ 2. Backend Architecture (Edge Functions)
 
-### Step A: Project Keys
+We use **Supabase Edge Functions** to bridge the gap between our static frontend and third-party APIs.
 
-1. Create project at [database.new](https://database.new).
-2. Create `.env.local` (Do not commit):
-```bash
-NEXT_PUBLIC_SUPABASE_URL="https://your-ref.supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
+### Function A: `sync-projects`
 
-```
+* **Trigger:** Manual button press in `/console` or Cron Job.
+* **Logic:** Fetches `GITHUB_TOKEN`, scrapes repos with topic `showcase-b2me` (public & private), and updates the database cache.
+
+### Function B: `send-email`
+
+* **Trigger:** Contact Form on the home page.
+* **Logic:**
+1. **Honeypot Check:** Checks a hidden `phone_number` field. If filled (by a bot), returns 200 OK but sends nothing.
+2. **Dispatch:** Uses `RESEND_API_KEY` to email the site owner.
+3. **Identity:** Sends from `system@contact.btwo.me` but sets `Reply-To` as the visitor's email.
 
 
 
-### Step B: Database Schema (SQL)
+---
+
+## 💾 3. Database Schema
 
 Run this in the Supabase **SQL Editor** to create the caching layer.
 
@@ -172,62 +183,73 @@ create policy "System Update" on project_cache for all using ( auth.role() = 'se
 
 ---
 
-## 🎨 3. Component Migration (The Transplant)
+## 🖥️ 4. Key Frontend Features
 
-We are leveraging the UI from `bolg55/SaaS-Starter` but stripping its backend logic.
+### The Command Console (`/console`)
 
-### Process:
+A hidden administrative route.
 
-1. **Clone Source:** Clone the starter repo into a *separate* folder on your computer (do not `npm install` inside it, just view the files).
-2. **Copy Components:** Manually copy `Hero.tsx`, `Navbar.tsx`, and `Footer.tsx` (or their equivalents) into your new `components/` folder.
-3. **Sanitize:** Open each file and **DELETE** any imports related to:
-* ❌ `next-auth` or `useSession`
-* ❌ `prisma` or `@prisma/client`
-* ❌ `trpc` or `axios`
+* **Gatekeeper:** Checks if user input matches `NEXT_PUBLIC_ADMIN_KEY`.
+* **Function:** Provides a UI to view system logs and manually trigger the `sync-projects` Edge Function without needing CLI access.
 
+### The Scheduler (Cal.com)
 
-4. **Wire Up Data:** Replace any `prisma.findMany()` or API calls with standard TanStack Query hooks.
+* **Integration:** Uses `@calcom/embed-react`.
+* **Trigger:** The "Initialize Sync" buttons in the Services section trigger a modal popup.
+* **UX:** Keeps the user on the site while booking.
 
-**Example: Migrating a Grid Component**
+### The Spam Trap (Honeypot)
 
-```tsx
-'use client'
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
-
-// 1. Define the Fetcher
-const fetchProjects = async () => {
-  // Use Edge Function in production, or direct select for MVP
-  const { data } = await supabase.from('project_cache').select('*')
-  return data
-}
-
-// 2. Use the Hook (replaces generic useEffect or SSR)
-export default function ProjectGrid() {
-  const { data, isLoading } = useQuery({ queryKey: ['projects'], queryFn: fetchProjects })
-  
-  if (isLoading) return <div>Loading Blueprints...</div>
-  return <div>{data?.map(p => <p key={p.id}>{p.name}</p>)}</div>
-}
-
-```
+* **Implementation:** The Contact form includes a hidden input named `phone_number`.
+* **Defense:** CSS hides this from humans (`class="hidden"`). Bots scanning HTML will fill it. The backend silently rejects any request where this field is not empty.
 
 ---
 
-## 🔌 4. App Integration & Logic
+## 🏷️ 5. CMS Strategy: GitHub Topics
 
-### Caching Strategy (Stale-While-Revalidate)
+Repositories are controlled via **GitHub Topics**. The Edge Function looks for specific tags to categorize and display your work.
 
-To avoid hitting GitHub's API rate limits (60 requests/hr), we implement a "Smart Cache" in the `sync-projects` Edge Function.
+**Adding Topics:** Go to your Repo  About (Gear Icon)  Topics.
 
-1. **Check DB:** Is the data in `project_cache` less than 24 hours old?
-2. **If Yes:** Return DB data immediately (Milliseconds).
-3. **If No:** Fetch fresh data from GitHub API  Save to DB  Return data.
-4. **Admin Override:** A "Refresh Now" button in the Admin Console bypasses the 24h check.
+### 1. The Triggers (Must Have)
+
+| Tag | Purpose | Behavior |
+| --- | --- | --- |
+| `showcase-b2me` | **Ingestion Trigger** | **REQUIRED.** The scraper IGNORES any repo without this tag. |
+| `featured-b2me` | **Hero Placement** | Pins the repo to the "Featured" section (Top of Grid). |
+
+### 2. Lifecycle Stage (`stage-*`)
+
+*Defines the current state of the project's existence.*
+
+| Tag | Phase | Visual / Behavior |
+| --- | --- | --- |
+| `stage-planning` | Blueprint | Repo exists but is in research/design phase. |
+| `stage-developing` | Construction | Active work. Displays "WIP" warning or yellow badge. |
+| `stage-maintaining` | Production | Feature-complete & stable (LTS). Displays green "Stable" badge. |
+| `stage-deprecated` | End-of-Life | No longer supported. Displays as greyed out/archived. |
+
+### 3. Target Platform (`arch-*`)
+
+*Defines the hardware or environment the software is built for.*
+
+| Tag | Concept | Example Use Case |
+| --- | --- | --- |
+| `arch-embedded` | Hardware/IoT | Raspberry Pi, Arduino, Custom PCBs, Firmware. |
+| `arch-mobile` | Handheld | iOS, Android, React Native, Flutter. |
+| `arch-desktop` | Workstation | Electron, Tauri, Native Windows/Linux apps. |
+| `arch-web` | Browser | Next.js, React, WebAssembly. |
+| `arch-cli` | Terminal | Command line tools, Scripts, Daemons. |
+
+### 4. Tech Stack (Standard Tags)
+
+*We use standard GitHub language tags for filtering (no prefix needed).*
+
+* `nextjs`, `python`, `golang`, `typescript`, `docker`, `kubernetes`
 
 ---
 
-## 🔐 5. Authentication: The "Access Key" System
+## 🔐 6. Authentication: The "Access Key" System (Phase 3 Spec)
 
 We use a **"Wallet-First"** identity model. The user is identified by a cryptographic key (Access Key), not necessarily an email.
 
@@ -243,7 +265,7 @@ We use a **"Wallet-First"** identity model. The user is identified by a cryptogr
 
 
 
-### The Recovery Mechanism (Phase 2)
+### The Recovery Mechanism
 
 Since losing the Access Key means losing the account, we offer a "Link Method."
 
@@ -251,20 +273,6 @@ Since losing the Access Key means losing the account, we offer a "Link Method."
 * **Action:** User provides an Email.
 * **Logic:** We upgrade the Supabase Anonymous User to an Authenticated User (Email/Password).
 * **Result:** User can now login with **EITHER** the Access Key (Legacy) **OR** Email/Password (Recovery).
-
----
-
-## 🏷️ 6. CMS Strategy: GitHub Topics
-
-Repositories are controlled via **GitHub Topics**. We do not update the database manually; the Edge Function scrapes these tags.
-
-| Tag | Purpose | Behavior |
-| --- | --- | --- |
-| `b2me-showcase` | **The Trigger** | **Required.** Repos without this are IGNORED. |
-| `stage-published` | Lifecycle | Repo is live and production-ready. |
-| `stage-dev` | Lifecycle | Repo is a "Construction Zone" (Visual warning on UI). |
-| `type-integration` | Category | Filters repo into the "Bridges & APIs" section. |
-| `status-stable` | Maintenance | Badges the repo as "LTS / Safe". |
 
 ---
 
@@ -320,28 +328,29 @@ We utilize three distinct environments to ensure stability.
 ### C. The Deployment Pipeline (Production)
 
 * **Trigger:** Push to `main` branch.
-* **Action:** GitHub Action builds static HTML and deploys to `user.github.io/b2me-portfolio`.
+* **Action:** GitHub Action builds static HTML and deploys to `btwo.me`.
 * **Config:** See Step 1D.
 
 ---
 
 ## 🗺️ 9. Feature Roadmap
 
-### Phase 1: Infrastructure (Current)
+### Phase 1: Infrastructure (Complete)
 
 * [x] Next.js Clean Build
 * [x] Supabase Project Setup
-* [x] CI/CD Pipeline
-* [x] UI Component Transplant (Hero, Nav)
+* [x] CI/CD Pipeline & Custom Domain (`btwo.me`)
 
-### Phase 2: Logic & Integration
+### Phase 2: Logic & Integration (Complete)
 
-* [ ] **Edge Function:** `sync-projects` (Fetch GitHub -> Update DB).
-* [ ] **Admin Console:** Hidden page to manually trigger `sync-projects`.
-* [ ] **Contact Form:** Wire up to Resend API (via Edge Function).
+* [x] **Edge Function:** `sync-projects` (Private Repo Support added).
+* [x] **Admin Console:** Secure client-side gate for triggers.
+* [x] **Communication:** Resend Integration with Subdomain (`contact.btwo.me`) & Spam Protection.
+* [x] **Service Integration:** Services list connected to Cal.com modal.
 
-### Phase 3: "The Soul"
+### Phase 3: User Accounts (Future)
 
-* [ ] **Access Key Auth:** Implement the generation/login flow.
-* [ ] **Recovery:** Add "Link Email" functionality.
-* [ ] **Business Cards:** Order physical cards with QR code to landing page.
+* [ ] **Configuration Abstraction:** Move site-specific strings (Cal.com handles, Brand names, Repo paths) to Environment Variables for easier portability.
+* [ ] **Access Key Auth:** Implement the generation/login flow (Wallet-First identity).
+* [ ] **Recovery:** Add "Link Email" functionality to secure the Access Key.
+* [ ] **Business Cards:** Physical cards with QR code mapping to the landing page.

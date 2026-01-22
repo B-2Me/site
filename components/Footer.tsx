@@ -32,6 +32,7 @@ export default function Footer() {
             <li><Link href="#projects" className="hover:text-cyan-400 transition-colors flex items-center gap-2">› PROJECTS</Link></li>
             <li><Link href="#services" className="hover:text-cyan-400 transition-colors flex items-center gap-2">› SERVICES</Link></li>
             <li><Link href="#about" className="hover:text-cyan-400 transition-colors flex items-center gap-2">› ABOUT</Link></li>
+            <li><Link href="#contact" className="hover:text-cyan-400 transition-colors flex items-center gap-2">› CONTACT</Link></li>
           </ul>
         </div>
 
@@ -55,7 +56,7 @@ export default function Footer() {
 
       <div className="mt-16 border-t border-blue-900/20 pt-8 text-center text-slate-500 text-xs tracking-wider uppercase">
         <p>&copy; {currentYear} BTWO.ME SYSTEMS. ALL RIGHTS RESERVED.</p>
-        <p className="mt-2 text-slate-600">RENDERED_BY: NEXT_JS_16 :: HOST: GITHUB_PAGES</p>
+        <p className="mt-2 text-slate-600">RENDERED_BY: NEXT_JS_16 :: HOST: GITHUB_PAGES :: BACKEND: SUPABASE</p>
       </div>
     </footer>
   )

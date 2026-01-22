@@ -3,8 +3,8 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import ProjectGrid from '@/components/ProjectGrid'
 import About from '@/components/About'
+import Contact from '@/components/Contact'
 
-// 1. Helper for the Grid Background
 const bgStyle = {
   backgroundImage: `url('${process.env.NODE_ENV === 'production' ? '/grid.svg' : '/grid.svg'}')`
 }
@@ -14,11 +14,7 @@ export default function Home() {
     <main className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-cyan-500/30">
       <Navbar />
 
-      {/* HERO FIX:
-         - Removed 'justify-center' (Stops vertical floating)
-         - Added 'pt-32 md:pt-48' (Anchors content to the top visual third)
-         - Changed h-[90vh] to min-h-[85vh] (Ensures it covers screen but allows scrolling)
-      */}
+      {/* Hero Section */}
       <section 
         id="hero" 
         style={bgStyle} 
@@ -36,11 +32,11 @@ export default function Home() {
             Embedded  ✱  AI  ✱  Cloud<br/>
           </p>
           
-          <div className="pt-8 flex gap-4 justify-center">
-             <a href="#projects" className="px-8 py-3 border border-cyan-500 text-cyan-400 font-mono hover:bg-cyan-950/50 transition-all rounded-sm">
+          <div className="pt-8 flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto px-8 sm:px-0">
+             <a href="#projects" className="px-8 py-3 border border-cyan-500 text-cyan-400 font-mono hover:bg-cyan-950/50 transition-all rounded-sm text-center whitespace-nowrap">
               [ VIEW_PROJECTS ]
             </a>
-            <a href="#services" className="px-8 py-3 bg-blue-700 hover:bg-blue-600 text-white font-mono rounded-sm transition-all shadow-[0_0_15px_rgba(0,71,171,0.5)]">
+            <a href="#services" className="px-8 py-3 bg-blue-700 hover:bg-blue-600 text-white font-mono rounded-sm transition-all shadow-[0_0_15px_rgba(0,71,171,0.5)] text-center whitespace-nowrap">
               [ VIEW_SERVICES ]
             </a>
           </div>
@@ -58,10 +54,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Services Section */}
-      <section id="services" className="py-24 px-4 bg-slate-950 relative border-b border-blue-900/30">
+      {/* Services Section - REDUCED BOTTOM PADDING (pb-12) */}
+      <section id="services" className="pt-24 pb-12 px-4 bg-slate-950 relative border-b border-blue-900/30">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-900 to-transparent opacity-50"></div>
         <Pricing />
+      </section>
+
+      {/* Contact Section - REDUCED TOP PADDING (pt-12) */}
+      <section id="contact" className="pt-12 pb-24 px-4 bg-slate-950 relative border-b border-blue-900/30">
+         <div className="max-w-4xl mx-auto text-center mb-12">
+            <h3 className="text-3xl font-mono text-white mb-4">// SECURE_UPLINK</h3>
+            <p className="text-slate-400">Initialize handshake to request collaboration.</p>
+         </div>
+         <Contact />
       </section>
 
       {/* About Section */}
