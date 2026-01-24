@@ -42,7 +42,7 @@ export default function Footer() {
 
         {/* Column 3: Connect */}
         <div className="space-y-6">
-          <h4 className="text-white font-bold text-xs uppercase tracking-widest border-b border-slate-800 pb-2 w-fit">// COMMS_UPLINK</h4>
+          <h4 className="text-white font-bold text-xs uppercase tracking-widest border-b border-slate-800 pb-2 w-fit">// EXTERNAL_LINKS</h4>
           <div className="flex gap-4">
             <a href="https://github.com/nater0000" target="_blank" rel="noopener noreferrer" className="p-2 border border-slate-800 rounded bg-slate-900/50 hover:bg-slate-800 hover:text-white hover:border-cyan-500/50 transition-all group">
               <Github className="w-5 h-5 group-hover:scale-110 transition-transform" />
@@ -54,7 +54,7 @@ export default function Footer() {
               <Mail className="w-5 h-5 group-hover:scale-110 transition-transform" />
             </a>
           </div>
-          <p className="text-xs text-slate-600">Communications open 24/7/365</p>
+          <p className="text-xs text-slate-600">Communications open 24/7</p>
         </div>
       </div>
 
