@@ -5,7 +5,7 @@ import { Menu, X } from 'lucide-react'
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
 
-  // Close menu when resizing to desktop to prevent weird states
+  // Close menu when resizing to desktop
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -17,10 +17,11 @@ export default function Navbar() {
   }, [])
 
   const navLinks = [
-    { name: 'PROJECTS', href: '#projects' },
-    { name: 'SERVICES', href: '#services' },
-    { name: 'CONTACT', href: '#contact' },
     { name: 'ABOUT', href: '#about' },
+    { name: 'SERVICES', href: '#services' },
+    { name: 'EXPERIENCE', href: '#experience' },
+    { name: 'PROJECTS', href: '#projects' },
+    { name: 'CONTACT', href: '#contact' },
   ]
 
   return (
@@ -35,7 +36,7 @@ export default function Navbar() {
             </span>
           </div>
 
-          {/* Desktop Menu (Hidden on Mobile) */}
+          {/* Desktop Menu */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
               {navLinks.map((link) => (
@@ -50,12 +51,11 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Mobile Menu Button (Visible on Mobile) */}
+          {/* Mobile Menu Button */}
           <div className="md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-slate-400 hover:text-cyan-400 p-2 transition-colors focus:outline-none"
-              aria-label="Toggle menu"
             >
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -63,7 +63,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown (Animated) */}
+      {/* Mobile Menu Dropdown */}
       <div 
         className={`md:hidden absolute w-full bg-slate-950 border-b border-blue-900/30 shadow-2xl transition-all duration-300 ease-in-out overflow-hidden ${
           isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
@@ -80,13 +80,6 @@ export default function Navbar() {
               {link.name}
             </a>
           ))}
-          {/* Mobile Admin Link (Hidden usually, but accessible) */}
-          <a
-             href="/console"
-             className="block px-4 py-3 text-slate-600 text-[10px] font-mono hover:text-slate-400 mt-4"
-          >
-            :: SYSTEM_CONSOLE
-          </a>
         </div>
       </div>
     </nav>
