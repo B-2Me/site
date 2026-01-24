@@ -11,7 +11,7 @@ export default function Deployments() {
         "Embedded C/C++ Firmware",
         "Real-Time OS (RTOS)",
         "Golang / High Concurrency",
-        "Rust Integration",
+        "Hardware/Software Integration", // Replaced Assembly
         "Cross-Platform Drivers",
         "WHQL Certification Logic"
       ]
@@ -41,15 +41,15 @@ export default function Deployments() {
       ]
     },
     {
-      title: "NETWORK_&_SIGNAL",
+      title: "NETWORK_PROTOCOLS",
       icon: <Network className="w-4 h-4 text-cyan-500" />,
       items: [
+        "LTE / 3GPP Signaling",
+        "SDP (Session Description Protocol)",
+        "Packet Analysis (Wireshark)",
         "WebRTC & Real-Time Comms",
-        "Secure Tunnels (OpenSSH/WireGuard)",
         "Bluetooth LE / Serial Protocols",
-        "Audio/Video Stream Tuning",
-        "TCP/UDP Socket Programming",
-        "Legacy Protocol Bridging"
+        "TCP/UDP Socket Programming"
       ]
     }
   ]

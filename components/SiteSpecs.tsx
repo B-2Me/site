@@ -20,9 +20,9 @@ export default function SiteSpecs() {
       items: ["GitHub Pages", "Static Export", "CI/CD Actions", "Custom DNS"] 
     },
     { 
-      category: "DATA", 
+      category: "INTEGRATIONS", 
       icon: <Database className="w-4 h-4 text-cyan-500" />,
-      items: ["PostgreSQL Vectors", "Local Storage", "ISR Caching", "Public/Private Buckets"] 
+      items: ["GitHub API (Project Sync)", "Cal.com (Scheduling)", "Resend (Email API)", "Local Storage caching"] 
     }
   ]
 
