@@ -7,21 +7,21 @@ export default function Footer() {
 
   return (
     <footer className="border-t border-blue-900/30 bg-slate-950 text-slate-400 py-16 font-mono text-sm relative z-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
         
         {/* Column 1: Identity */}
-        <div className="space-y-6">
+        <div className="flex flex-col items-center md:items-start space-y-6">
           <span className="text-cyan-400 font-bold text-lg tracking-tighter block">[ BTWO.ME ]</span>
-          <div className="text-slate-500 space-y-2 text-xs leading-relaxed">
-            <p className="flex items-center gap-2">
+          <div className="text-slate-500 space-y-2 text-xs leading-relaxed w-full">
+            <p className="flex items-center justify-center md:justify-start gap-2">
                // System Status: 
                <span className="text-green-500 flex items-center gap-1.5">
                  <Radio className="w-3 h-3 animate-pulse" />
                  OPERATIONAL
                </span>
             </p>
-             {/* Admin Console Link - Accessible on all devices */}
-             <Link href="/console" className="flex items-center gap-2 text-slate-600 hover:text-cyan-600 transition-colors mt-4">
+             {/* Admin Console Link */}
+             <Link href="/console" className="flex items-center justify-center md:justify-start gap-2 text-slate-600 hover:text-cyan-600 transition-colors mt-4">
                <Lock className="w-3 h-3" />
                // ACCESS_CONSOLE
              </Link>
@@ -29,9 +29,10 @@ export default function Footer() {
         </div>
 
         {/* Column 2: Navigation */}
-        <div className="space-y-6">
+        <div className="flex flex-col items-center md:items-start space-y-6">
           <h4 className="text-white font-bold text-xs uppercase tracking-widest border-b border-slate-800 pb-2 w-fit">// NAVIGATION</h4>
-          <ul className="space-y-3 text-xs">
+          {/* w-fit + text-left ensures the arrows align vertically, even though the block is centered */}
+          <ul className="space-y-3 text-xs w-fit text-left">
             <li><Link href="#about" className="hover:text-cyan-400 transition-colors flex items-center gap-2">› ABOUT</Link></li>
             <li><Link href="#services" className="hover:text-cyan-400 transition-colors flex items-center gap-2">› SERVICES</Link></li>
             <li><Link href="#experience" className="hover:text-cyan-400 transition-colors flex items-center gap-2">› EXPERIENCE</Link></li>
@@ -41,9 +42,9 @@ export default function Footer() {
         </div>
 
         {/* Column 3: Connect */}
-        <div className="space-y-6">
+        <div className="flex flex-col items-center md:items-start space-y-6">
           <h4 className="text-white font-bold text-xs uppercase tracking-widest border-b border-slate-800 pb-2 w-fit">// EXTERNAL_LINKS</h4>
-          <div className="flex gap-4">
+          <div className="flex justify-center md:justify-start gap-4">
             <a href="https://github.com/nater0000" target="_blank" rel="noopener noreferrer" className="p-2 border border-slate-800 rounded bg-slate-900/50 hover:bg-slate-800 hover:text-white hover:border-cyan-500/50 transition-all group">
               <Github className="w-5 h-5 group-hover:scale-110 transition-transform" />
             </a>
